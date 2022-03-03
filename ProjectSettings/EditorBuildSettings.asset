@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/TitleScreen.unity
+    guid: a01772c5c782e654d9af7bed68ad5143
+  - enabled: 1
+    path: Assets/Scenes/RaceScene.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/RaceEndScreen.unity
+    guid: aa089995d14f2bf41a803c46136052f2
+  - enabled: 1
+    path: Assets/Scenes/TutorialScene.unity
+    guid: 0fc368df650ba6c4fab015f73a378752
+  m_configObjects: {}
