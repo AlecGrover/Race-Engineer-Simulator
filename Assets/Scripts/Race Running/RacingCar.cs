@@ -75,6 +75,7 @@ public class RacingCar : MonoBehaviour
     // LapTime and Pace Parameters
     public float LapTimeModifier= 0f;
     private float _lapTimeStart;
+    private float _lapTime = 0f;
     private float _lapExtraTime;
     private float _multiplierOverride= 100f;
 
@@ -82,6 +83,7 @@ public class RacingCar : MonoBehaviour
     private float _lastLapTime;
 
     private float _stopStartTime = 0;
+    private float _stopDuration = 0f;
 
     void Awake()
     {
@@ -104,6 +106,7 @@ public class RacingCar : MonoBehaviour
         };
         currentTireType = StartingTireTireType;
         _lapTimeStart = Time.time;
+        _lapTime = 0f;
     }
 
     // Start is called before the first frame update
@@ -116,7 +119,11 @@ public class RacingCar : MonoBehaviour
     public void Tick()
     {
         // If the car is pitted, no updates should take place
-        if (CheckIfStopped()) return;
+        if (CheckIfStopped())
+        {
+            if (_isPitted) _stopDuration += Time.deltaTime;
+            return;
+        }
         // Calculates the progress made during this tick based on the duration of the previous frame
         float newProgress = GetLapTimeModifier() * Time.deltaTime / _currentTrack.GetLapTime();
         // Increments the tire wear based on the current wear multiplier and the percentage of a lap completed
@@ -128,6 +135,7 @@ public class RacingCar : MonoBehaviour
         }
         // The raw lap progress, which tracks lap completion fractionally, is incremented
         _rawLapProgress += newProgress;
+        _lapTime += Time.deltaTime;
     }
     
     // Returns the theoretical lap time modifer if no modifier restrictions were applied
@@ -167,7 +175,8 @@ public class RacingCar : MonoBehaviour
     // Triggers pit stops if necessary, increments tire wear, increments lap counts, sets lap time information, plays an audio clip for a car passing the pit wall
     private void LapComplete()
     {
-        _lastLapTime = Time.time - _lapTimeStart;
+        // _lastLapTime = Time.time - _lapTimeStart;
+        _lastLapTime = _lapTime;
         // Debug.Log($"{DriverName} lap {Mathf.FloorToInt(GetRawProgress()):f2} complete, current modifier is {GetLapTimeModifier():f2}");
         if (!PitFlag)
         {
@@ -176,6 +185,7 @@ public class RacingCar : MonoBehaviour
             _lapsInCurrentStint++;
             _lapsSinceLastStop++;
             _lapTimeStart = Time.time;
+            _lapTime = 0f;
             if (GetRawLapTimeModifier() <= 0.5f)
             {
                 if (_disqualificationWarningIssuedOnLap > Mathf.RoundToInt(_rawLapProgress))
@@ -248,7 +258,8 @@ public class RacingCar : MonoBehaviour
         }
         else
         {
-            currentLapTime= Time.time - _lapTimeStart;
+            // currentLapTime= Time.time - _lapTimeStart;
+            currentLapTime = _lapTime;
         }
 
         return currentLapTime;
@@ -309,7 +320,11 @@ public class RacingCar : MonoBehaviour
         // Being pitted prevents the race runner from adjusting the pace based on proximity, and the car needs to be released at full pace, so any modifiers are cleared
         UnlockModifier();
         _stopStartTime = Time.time;
-        yield return new WaitForSeconds(stopDuration);
+        _stopDuration = 0f;
+        while (_stopDuration < _pitStopDuration)
+        {
+            yield return new WaitForEndOfFrame();
+        }
         // Switches old tires for new ones based on the set next tire type
         currentTires = nextTireType switch
         {
@@ -326,6 +341,7 @@ public class RacingCar : MonoBehaviour
         _lapsSinceLastStop = 0;
         _tireWearLapsSinceLastStop = 0;
         _lapTimeStart = Time.time;
+        _lapTime = 0f;
         Debug.Log($"{DriverName} has completed a pitstop, now using {currentTireType.ToString()}");
     }
 
@@ -382,4 +398,13 @@ public class RacingCar : MonoBehaviour
         return _stopStartTime;
     }
 
+    public float GetStopTimerValue()
+    {
+        return _stopDuration;
+    }
+
+    public float GetExpectedPitDuration()
+    {
+        return _pitStopDuration;
+    }
 }

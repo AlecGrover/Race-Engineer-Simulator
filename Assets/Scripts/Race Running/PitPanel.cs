@@ -159,7 +159,7 @@ public class PitPanel : MonoBehaviour
         foreach (var tireOption in TireOptions)
         {
             if (tireOption.TireType != displayTireType) continue;
-            if (tireOption.TireSprite == TireImageRenderer.sprite) return;
+            if (tireOption.TireSprite == TireImageRenderer.sprite) break;
             TireImageRenderer.sprite = tireOption.TireSprite;
             break;
         }
@@ -181,7 +181,7 @@ public class PitPanel : MonoBehaviour
             nextStopLap += 1;
         }
 
-        PitTimeRemainingText.text = Player.IsInPit() ? $"{timeRemaining:f2}" : "25.00";
+        PitTimeRemainingText.text = Player.IsInPit() ? $"{timeRemaining:f2}" : $"{Player.RaceCar.GetExpectedPitDuration():f2}";
         ExpectedDurabilityText.text = $"{expectedLife} laps";
         SpeedReadoutText.text = speedString;
         ExpectedNextStopText.text = nextStopLap < _currentTrack.LapCount ? $"Lap {nextStopLap}" : "No More Stops";
@@ -248,13 +248,28 @@ public class PitPanel : MonoBehaviour
 
         if (_lastSector != sectorNumber)
         {
-            float lastSplit = _lastLapSectorTimes[_lastSector - 1];
-            _lastLapSectorTimes[_lastSector - 1] = activeLapTime;
-            _lastSector = sectorNumber;
-            if (_currentLap != 1)
+            float lastSplit;
+            if (_lastSector == 3)
             {
-                _lastLapSplit = activeLapTime - lastSplit;
+                lastSplit = _lastLapSectorTimes[_lastSector - 1];
+                _lastLapSectorTimes[_lastSector - 1] = Player.RaceCar.GetLastLapTime();
+                _lastSector = sectorNumber;
+                if (_currentLap > 2)
+                {
+                    _lastLapSplit = Player.RaceCar.GetLastLapTime() - lastSplit;
+                }
             }
+            else
+            {
+                lastSplit = _lastLapSectorTimes[_lastSector - 1];
+                _lastLapSectorTimes[_lastSector - 1] = activeLapTime;
+                _lastSector = sectorNumber;
+                if (_currentLap != 1)
+                {
+                    _lastLapSplit = activeLapTime - lastSplit;
+                }
+            }
+
         }
     }
 

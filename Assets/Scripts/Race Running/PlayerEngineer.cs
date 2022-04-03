@@ -103,7 +103,7 @@ public class PlayerEngineer : MonoBehaviour
 
     public float GetPitTimeRemaining()
     {
-        float pitTimeRemaining = RaceCar.GetPitTime() - (Time.time - RaceCar.GetStopStartTime());
+        float pitTimeRemaining = RaceCar.GetPitTime() - RaceCar.GetStopTimerValue();
         return Mathf.Clamp(pitTimeRemaining, 0, RaceCar.GetPitTime());
     }
 

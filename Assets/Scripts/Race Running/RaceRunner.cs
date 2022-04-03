@@ -124,7 +124,7 @@ public class RaceRunner : MonoBehaviour
         RacingCar leader= RaceStandings[0].Racer;
         leader.UnlockModifier();
         // Calls the leading car's tick function iff the leader is on track and has not finished the race
-        if (!RaceStandings[0].RaceComplete && !leader.CheckIfStopped())
+        if (!RaceStandings[0].RaceComplete)
         {
             leader.Tick();
             // Checks if the leader has crossed the finish line of the last lap, if so, marks the position as having completed the race
@@ -150,7 +150,7 @@ public class RaceRunner : MonoBehaviour
             RacingCar thisCar = thisPosition.Racer;
             RacingCar nextCar = nextPosition.Racer;
 
-            // If a car is stopped or the race is complete, nothing should change, so simply continue
+            // If a car is stopped or the race is complete, no splits or positions should change, so simply continue. If the car is pitted it still will need its tick function called.
             if (thisCar.CheckIfStopped() || thisPosition.RaceComplete)
             {
                 if (thisCar.CheckIfDisqualified())
@@ -161,6 +161,11 @@ public class RaceRunner : MonoBehaviour
                         thisPosition.RaceComplete = true;
                     }
                 }
+                else if (thisCar.CheckIfPitted())
+                {
+                    thisCar.Tick();
+                }
+
                 continue;
             }
 
